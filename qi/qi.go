@@ -50,7 +50,7 @@ type (
 	Walkfn func(f File)
 )
 
-// NewRoot builds the chaos root filesystem
+// NewRoot builds the qi root filesystem
 func NewRoot() *MemFS {
 	fs := NewMemFS()
 

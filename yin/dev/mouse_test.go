@@ -35,13 +35,10 @@ func TestMouseUpdate(t *testing.T) {
 
 func testMouseUpdate(t *testing.T, ex, ey int) {
 	m := dev.MouseInit()
-	done := make(chan bool)
 	go func() {
-		done <- true
 		m.UpdateCoords(ex, ey)
 	}()
 
-	<-done
 	content, err := ioutil.ReadAll(m)
 	assert.NoError(t, err)
 

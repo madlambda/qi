@@ -14,7 +14,7 @@ type (
 	mouseFile struct {
 		updates chan mouseStatus
 
-		mu  sync.RWMutex
+		mu  *sync.Mutex
 		pos int64
 	}
 )
@@ -24,7 +24,8 @@ const statusLen = 11 + 1 + 11 // 00000000000 00000000000
 // MouseInit initializes the mouse driver
 func MouseInit() *mouseFile {
 	m := &mouseFile{
-		updates: make(chan mouseStatus, 1),
+		updates: make(chan mouseStatus),
+		mu:      &sync.Mutex{},
 	}
 	return m
 }
@@ -37,8 +38,8 @@ func (m *mouseFile) UpdateCoords(x, y int) {
 }
 
 func (m *mouseFile) Read(data []byte) (int, error) {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 
 	status := <-m.updates
 
@@ -57,6 +58,9 @@ func (m *mouseFile) Write(data []byte) (int, error) {
 }
 
 func (m *mouseFile) Seek(offset int64, whence int) (int64, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
 	if whence == io.SeekStart {
 		if offset < 0 {
 			return 0, fmt.Errorf("seek: invalid offset")
